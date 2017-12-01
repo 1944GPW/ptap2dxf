@@ -26,5 +26,5 @@ It can make 11/16”-wide 5-level tape for an old Baudot machine. You could even
 plastic film or sheet.
 
 * For more information see the User Manual PDF in the Documentation folder.
-* For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary for PTAP2DXF.EXE
+* For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary folder for PTAP2DXF.EXE
 * This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt
