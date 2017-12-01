@@ -24,3 +24,5 @@ special utility to a paper tape image. In addition PTAP2DXF can be used for fun 
 along the tape in an upper case 8x8 font, or as a text label punched as a prefixed description at the start of a binary tape. 
 It can make 11/16”-wide 5-level tape for an old Baudot machine. You could even experiment making tapes from various types of 
 plastic film or sheet.
+
+For more information see the User Manual PDF in the Documentation folder.
