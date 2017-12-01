@@ -25,6 +25,6 @@ along the tape in an upper case 8x8 font, or as a text label punched as a prefix
 It can make 11/16”-wide 5-level tape for an old Baudot machine. You could even experiment making tapes from various types of 
 plastic film or sheet.
 
-For more information see the User Manual PDF in the Documentation folder.
-For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary for PTAP2DXF.EXE
-This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt
+* For more information see the User Manual PDF in the Documentation folder.
+* For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary for PTAP2DXF.EXE
+* This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt
