@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ptap2dxf": {
+      "commandName": "Project",
+      "commandLineArgs": "--help --wait"
+    }
+  }
+}
