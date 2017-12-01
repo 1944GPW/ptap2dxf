@@ -21,13 +21,10 @@ __SOLUTION_PREBUILD/obj/
 __SOLUTION_POSTBUILD/bin/
 __SOLUTION_POSTBUILD/obj/
 
-Core\ Files/
-
 #*.exe
 # 1944GPW 20141003 REMOVED FOR Nuget PACKAGES                   *.dll
 # 1944GPW 20150807 REMOVED FOR Nuget PACKAGES AUTOUPDATER       *.exe
 
-Core Files/
 
 # MSBuild project artifacts 
 # see 	http://www.codeproject.com/Tips/177770/Creating-MSBuild-projects-from-sln-files
