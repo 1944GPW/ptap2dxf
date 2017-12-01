@@ -18,7 +18,7 @@ as well as a smaller sprocket feed hole. The rows are spaced at 0.1 inch apart.
 
 Its primary use is to make small tapes for loading software such as Absolute Loaders, MAINDECs (diagnostics)  or other programs 
 into vintage computers such as the Digital Equipment Corporation PDP-11, Altair, IMSAI or the like. These images are commonly 
-found with a .PTAP, .PTP,, .TAP, .BIN or other extension and are often used with the SIMH simulator. PTAP2DXF does not actually 
+found with a .PTAP, .PTP, .TAP, .BIN or other extension and are often used with the SIMH simulator. PTAP2DXF does not actually 
 care about file types as it treats everything as binary. In some situations the binary may first need to be converted using a 
 special utility to a paper tape image. In addition PTAP2DXF can be used for fun purposes such as punching letters and words 
 along the tape in an upper case 8x8 font, or as a text label punched as a prefixed description at the start of a binary tape. 
