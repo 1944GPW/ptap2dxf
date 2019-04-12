@@ -1,4 +1,4 @@
-# ptap2dxf
+﻿# ptap2dxf
 PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home stencil cutting machine 
 
 * Do you have a vintage computer and paper tape reader, but no punch?
@@ -10,6 +10,8 @@ PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home s
 * Want to make your own custom-punched paper tape?
 
 If your answer is 'yes' to any of these questions then PTAP2DXF is for you.
+This tape was created with PTAP2DXF:
+![alt text](https://github.com/1944GPW/ptap2dxf/blob/master/Photos%20and%20screenshots/19_finished_tape_2_small.jpg?raw=true)
 
 PTAP2DXF is a small open source command line utility that allows the user to make up to 8-level ASCII paper tapes similar to those 
 punched by an ASR33 Teletype, using a common home CNC stencil cutter from binary images available on the internet, or your own 
