@@ -1,13 +1,13 @@
 ﻿# ptap2dxf
 PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home stencil cutting machine 
 
-* Do you have a vintage computer and paper tape reader, but no punch?
+* Do you have a vintage computer and paper tape reader, <b><i>but no punch</i></b>?
 * Do you need to make some repairs to an existing paper tape?
-* Interested in punching other materials but concerned they might damage your punch?
+* Interested in punching other materials but concerned they might damage a real punch?
 * Are you looking for a quick way to visualise a paper tape (.ptap) file for SIMH?
 * Would you like to produce paper tape banners from ASCII text?
 * Do you want to make 5-level Baudot-encoded RTTY paper tape?
-* Want to make your own custom-punched paper tape?
+* Want to make your own custom-punched n-level paper tape?
 
 If your answer is 'yes' to any of these questions then PTAP2DXF is for you.
 This tape was created with PTAP2DXF:
