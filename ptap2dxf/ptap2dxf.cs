@@ -1,18 +1,25 @@
 ﻿// PTAP2DXF - Paper tape binary image to Drawing Interchange Format
 //
-// A command line tool for Windows, Linux and Mac that generates one of more DXFs (Drawing Interchange Files) of 8-level ASCII teletype paper tape from an input binary file.
+// A command line tool for Windows, Linux and Mac that generates one of more DXFs (Drawing Interchange Files) of up to 8-level ASCII teletype paper tape from an input binary file.
 // The output DXF in turn is then loaded onto a home CNC stencil cutting machine to produce sections of paper tape that can be stuck together with tape joiners 
 // (generated with the /JOINER option) to produce a paper tape that should be readable by an ASR-33 Teletype or other vintage device.
 // The program can also generate text banners in an 8x8 font on paper tape, or a banner can be prepended as a label to a data tape output eg. 'ABS LDR'
+// Baudot 5-level tapes can be generated, or custom bit-width tapes.
 // Run with no arguments to get command help, or use the /HELP or --help parameter.
 // Builds under Visual Studio versions 2008, 2010, 2013, 2015 and 2017. Builds under Mono and VS2017 .NET Core. 
+// 
 // Written in C# by Steve Malikoff 2017 in Brisbane, Australia. Uses the DxfMaker library by David S Tufts.
 // You can contact me at steven <at> malikoff <dot> com or see the project page at https://github.com/1944GPW for more details.
+//
 // No warranties or fit-for-purpose given or implied. Use at your own risk.
 // Feel free to modify as you wish, but please leave this attribution and authors details intact, thank you.
 //
 // Building instructions
-// The ptap2dxf solution should build in VS2008 or higher, as a standalone EXE. 
+// The ptap2dxf solution should build in VS2008 or higher, as a standalone EXE.
+// For .NET Core on Windows, run the exe as follows (git bash shown here):
+//     Change to  $ cd ./ptap2dxf/ptap2dxf/bin/Debug/netcoreapp2.1
+//     Run with   $ dotnet ptap2dxf.dll --help
+// 
 // For .NET Core for Linux or Mac use VS2017. Run 'Restore Nuget Packages' for the solution.
 //
 // For .NET Core leave the following defined. Actually you can leave DOTNETCORE defined for all builds on DNX, COREFX or Mono.
@@ -36,6 +43,7 @@ namespace Ptap2DXF
     /// </summary>
     [Flags]
     public enum Numbering { NONE = 0, BANNER = 1, LEADER = 2, CODE = 4, TRAILER = 8, ALL = 15 }
+    public enum Parity { NONE = 0, EVEN = 1, ODD = 2 }
 
     /// <summary>
     /// Main class to deal with processing the input, generation of hole patterns, output.
@@ -80,10 +88,11 @@ namespace Ptap2DXF
         /// <param name="invertPattern">Invert the Mark/Space bit pattern (ie. logical NOT). If true, a zero bit then generates a punched hole and a one bit becomes a blank</param>
         /// <param name="banner">Add punched letters in 8x8 font. Upper case, digits and basic punctuation are supported only</param>
         /// <param name="numberedSection">Add line numbers to all or a particular desired section of the output</param>
+        /// <param name="parity">Add parity {NONE, EVEN, ODD} using the most significant bit (leftmost hole)</param>
         /// <returns>Return value. Zero for success, 1 for error. Useable by DOS ERRORLEVEL checking</returns>
         public int Generate(string someInputFileName, string someOutputFileName, int startOfData, int lengthOfData, int rowsPerSegment, int interSegmentGap, int segmentsPerDXF, 
                             int leader, int trailer, char mark, char space, bool drawVee, bool joiningTape, int level, int sprocketPos, bool mirror, bool quiet, bool showLineNumbers, bool showASCIIchars, bool showControlChars, 
-                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection)
+                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity)
         {
             #region Constants that determine one-inch-wide 0.1 inch-spaced 8-level paper tape
             // Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape. The base units are metric and we then derive imperial from them.
@@ -387,6 +396,27 @@ namespace Ptap2DXF
                 for (int rowPos = currentRow; rowPos < currentRow + rowsThisSegment; rowPos++)
                 {
                     BitArray ba = msgbits[rowPos];
+
+                    // Apply parity, if requested. Uses the MSB ie. high bit, or leftmost hole position. Default is NONE (ie. use the MSB for data)
+                    if (parity == Parity.EVEN)
+                    {
+                        int count = 0;
+                        for (int i = 0; i < level - 1; i++)
+                            if (ba.Get(i))
+                                count++;
+                        if (count % 2 == 1)
+                            ba.Set(level - 1, true);
+                    }
+                    if (parity == Parity.ODD)
+                    {
+                        int count = 0;
+                        for (int i = 0; i < level - 1; i++)
+                            if (ba.Get(i))
+                                count++;
+                        if (count % 2 == 0)
+                            ba.Set(level - 1, true);
+                    }
+
                     if (invertPattern)
                         ba = ba.Not();  // Invert bit pattern, if desired
                     if (!dryRun)
@@ -624,7 +654,7 @@ namespace Ptap2DXF
     /// </summary>
     public class Program
     {
-        const string VERSION = "1.0";   // Nothing complicated, here
+        const string VERSION = "1.1";   // Nothing complicated, here
 #if DOTNETCORE
         const string sep = "--";  // Unix-style fullword separator
 #else
@@ -661,6 +691,7 @@ namespace Ptap2DXF
             int sprocketPos = 3;                    // Position of sprocket feed hole. Zero puts it at the right edge, 7 at left edge. For the default 8-level tape it is between bits 2 and 3, ie. 3
             bool mirror = false;                    // Mirror image of tape so that underside joiners can be made (from paper, vinyl or contact plastic)
             bool baudot = false;                    // Convert ASCII alphanumeric and basic punctuation characters to Baudot code (forces level=5). Default is 8-level ASCII
+            Parity parity = Parity.NONE;            // Use high bit (leftmost hole) as a parity bit, can be EVEN or ODD. Default is no parity
             bool waitAtEnd = false;                 // Issue a 'Press a key to End' before returning to command prompt
             int start = -1;
             int length = -1;
@@ -867,6 +898,29 @@ namespace Ptap2DXF
                         }
                         break;
 
+                    case "-PARITY": case "/PARITY": case "--PARITY":
+                        try
+                        {
+                            if (tokens.Count() > 1)
+                            {
+                                string parityString = parameter.ToUpper().Split('=').Last();
+                                if (!string.IsNullOrEmpty(parityString))
+                                    switch (parityString.ToUpper())
+                                    {
+                                        case "EVEN": parity = Parity.EVEN; break;
+                                        case "ODD": parity = Parity.ODD; break;
+                                        default: parity = Parity.NONE; break;
+                                    }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Bad parity string specified. Use " + sep + "parity={NONE,EVEN,ODD} Default is NONE");
+                            errorLevel = 1;
+                        }
+                        break;
+
+
                     case "-Q":  case "/Q":  case "--Q": case "--QUIET": case "/QUIET":
                         quiet = true;
                         break;
@@ -1042,7 +1096,7 @@ namespace Ptap2DXF
             PTAP2DXF papertape = new PTAP2DXF();
             errorLevel = papertape.Generate(inputFileName, outputFileName, start, length, segment, interSegmentGap, segmentsPerDXF, leader, trailer, mark, space, drawVee, 
                                                 joiningTape, level, sprocketPos, mirror, quiet, lineNumbers, showASCIIChars, showControlChars, dryRun, invertPattern, baudot, 
-                                                banner, messageText, requestedNumbering);
+                                                banner, messageText, requestedNumbering, parity);
             if (waitAtEnd)
             {
                 Console.Write("Hit Enter to end");
@@ -1058,6 +1112,7 @@ namespace Ptap2DXF
         {
             Console.WriteLine("PTAP2DXF - Generate DXF files from teletype punched paper tape binary images, suitable for home CNC stencil cutting");
             Console.WriteLine("Written in C# by Steve Malikoff 2017 in Brisbane, Australia. Uses the DxfMaker library written by David S. Tufts");
+            Console.Write("Version " + VERSION + "      ");
             Console.WriteLine("See https://github.com/1944GPW for more details");
             Console.WriteLine("Usage:");
             Console.WriteLine("ptap2dxf [inputfilename.ptap]                      (Input ASCII file to be punched. Same as " + sep + "INPUT=\"/path/to/inputfile\")");
@@ -1078,6 +1133,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "MIRROR]                                (Reverse the output mark/space bit pattern to right-left)");
             Console.WriteLine("         [" + sep + "NUMBER=BANNER|LEADER|CODE|TRAILER|ALL] (NOTE: " + sep + "N defaults to number the code lines only)");
             Console.WriteLine("         [" + sep + "OUTPUT=/path/to/outputfile.dxf]        (output DXF file)");
+            Console.WriteLine("         [" + sep + "PARITY=NONE|EVEN|ODD]                  (Parity, if desired. Uses MSB ie. leftmost hole. {NONE, EVEN, ODD}. Default is NONE)");
             Console.WriteLine("         [" + sep + "PERDXF=n]                              (Fill CNC cutting mat with this number of 1-inch-wide (for 8-level) segment strips across before starting another. 5-level = 11/16-inch)");
             Console.WriteLine("         [" + sep + "QUIET]                                 (do not write any console output)");
             Console.WriteLine("         [" + sep + "RANGE=n,[L [-p] [+-z]]                 (Start generation at byte n and run for following length L or previous p or prefix/suffix z bytes)");
