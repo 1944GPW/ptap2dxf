@@ -10,12 +10,12 @@ PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home s
 * Want to make your own custom-punched n-level paper tape?
 
 If your answer is 'yes' to any of these questions then PTAP2DXF is for you.
-This tape was created with PTAP2DXF:
+This tape was created with PTAP2DXF and a 2016 model Silhouette CAMEO vinyl/stencil cutter:
 ![alt text](https://github.com/1944GPW/ptap2dxf/blob/master/Photos%20and%20screenshots/19_finished_tape_2_small.jpg?raw=true)
 
 PTAP2DXF is a small open source command line utility that allows the user to make up to 8-level ASCII paper tapes similar to those 
-punched by an ASR33 Teletype, using a common home CNC stencil cutter from binary images available on the internet, or your own 
-files. For the default 8-level tape it makes, the output is one inch wide with a pattern of up to 8 data mark/space holes across 
+punched by an ASR33 Teletype, using a common home CNC stencil cutter (eg. Silhouette Cameo, Cricut etc) from binary images available on the internet, or your own files. 
+For the default 8-level tape it makes, the output is one inch wide with a pattern of up to 8 data mark/space holes across 
 as well as a smaller sprocket feed hole. The rows are spaced at 0.1 inch apart.
 
 Its primary use is to make small tapes for loading software such as Absolute Loaders, MAINDECs (diagnostics)  or other programs 
@@ -29,4 +29,4 @@ plastic film or sheet.
 
 * For more information see the User Manual PDF in the Documentation folder.
 * For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary folder for PTAP2DXF.EXE
-* This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt
+* This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt or try the pre-built ptap2dxf.dll
