@@ -1236,6 +1236,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "BANNERFILE=/path/to/bannerfile]        (Generate uppercase punched banner in 8x8 font from ASCII file contents)");
             Console.WriteLine("         [" + sep + "BANNERTEXT=\"YOUR TEXT\"]                (Generate uppercase punched banner in 8x8 font from string)");
             Console.WriteLine("         [" + sep + "BAUDOT]                                (convert ASCII characters to Baudot. Forces 5-level output)");
+            Console.WriteLine("         [" + sep + "CABLECODE]                             (Generate Morse tape with Cable Code coding (15/32\" wide))");
             Console.WriteLine("         [" + sep + "CHADLESS]                              (Punch Teletype Corp chadless holes (circa 1975))");
             Console.WriteLine("         [" + sep + "CONTROL-CHARS]                         (Show control characters on console output)");
             Console.WriteLine("         [" + sep + "DRYRUN]                                (Run everything but do not generate DXF file(s))");
@@ -1264,6 +1265,7 @@ namespace Ptap2DXF
             //BROKEN. TODO  Console.WriteLine("         [" + sep + "VEE]                                   (Draws /\\ vee at start of first and at end of last segment)");
             Console.WriteLine("         [" + sep + "VERSION]                               (Version number)");
             Console.WriteLine("         [" + sep + "WAIT]                                  (Pause for Enter on console after running)");
+            Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate Morse tape with Wheatstone coding (15/32\" wide))");
         }
     }
 
