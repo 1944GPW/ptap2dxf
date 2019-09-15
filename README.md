@@ -8,6 +8,7 @@ PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home s
 * Would you like to produce paper tape banners from ASCII text?
 * Do you want to make 5-level Baudot-encoded RTTY paper tape?
 * Want to make your own custom-punched or chadless n-level paper tape?
+* Want 15/32" Morse tape for demonstrating your pre-war Creed or wartime USN equipment?
 
 If your answer is 'yes' to any of these questions then PTAP2DXF is for you.
 This tape was created with PTAP2DXF, a 2016 model Silhouette CAMEO vinyl/stencil cutter and a used large yellow envelope:
@@ -22,12 +23,16 @@ Its primary use is to make small tapes for loading software such as Absolute Loa
 into vintage computers such as the Digital Equipment Corporation PDP-11, Altair, IMSAI or the like. These images are commonly 
 found with a .PTAP, .PTP, .TAP, .BIN or other extension and are often used with the SIMH simulator. PTAP2DXF does not actually 
 care about file types as it treats everything as binary. In some situations the binary may first need to be converted using a 
-special utility to a paper tape image. In addition PTAP2DXF can be used for fun purposes such as punching letters and words 
+special utility to a paper tape image. 
+
+In addition PTAP2DXF can be used for fun purposes such as punching letters and words 
 along the tape in an upper case 8x8 font, or as a text label punched as a prefixed description at the start of a binary tape. 
-It can make 11/16”-wide 5-level tape for an old Baudot machine, and Teletype Corp's chadless tape from the mid 70s. 
-You could even experiment making tapes from various types of plastic film or sheet.
+
+It can make 11/16”-wide 5-level tape for an old Baudot machine, and Teletype Corp's unusual half-punched chadless tape from the mid 70s. 
+It can now act like a Morse perforator and produce 15/32" wide Morse tape in both USN Wheatstone and Cable Code protocols.
+You can use it to experiment making tapes from various types of plastic film or sheet.
 
 * For more information see the User Manual PDF in the Documentation folder.
 * For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary folder for PTAP2DXF.EXE
 * This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt or try the pre-built ptap2dxf.dll
-* IN THE WORKS: exotic historical paper tape formats coming!
+* IN THE WORKS: more exotic historical paper tape formats coming!
