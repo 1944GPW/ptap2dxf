@@ -89,10 +89,11 @@ namespace Ptap2DXF
         /// <param name="banner">Add punched letters in 8x8 font. Upper case, digits and basic punctuation are supported only</param>
         /// <param name="numberedSection">Add line numbers to all or a particular desired section of the output</param>
         /// <param name="parity">Add parity {NONE, EVEN, ODD} using the most significant bit (leftmost hole)</param>
+        /// <param name="chadless">Teletype Corporation Chadless holes</param>
         /// <returns>Return value. Zero for success, 1 for error. Useable by DOS ERRORLEVEL checking</returns>
         public int Generate(string someInputFileName, string someOutputFileName, int startOfData, int lengthOfData, int rowsPerSegment, int interSegmentGap, int segmentsPerDXF, 
                             int leader, int trailer, char mark, char space, bool drawVee, bool joiningTape, int level, int sprocketPos, bool mirror, bool quiet, bool showLineNumbers, bool showASCIIchars, bool showControlChars, 
-                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity)
+                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity, bool chadless)
         {
             #region Constants that determine one-inch-wide 0.1 inch-spaced 8-level paper tape
             // Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape. The base units are metric and we then derive imperial from them.
@@ -122,6 +123,8 @@ namespace Ptap2DXF
             int codeOffset = 0;
             int codeCount = 0;
             int trailerCount = 0;
+            int chadlessStartAngle = 130;
+            int chadlessEndAngle = 50;
             #endregion //Variables
 
             #region Input filename check
@@ -296,6 +299,10 @@ namespace Ptap2DXF
                 Console.WriteLine("+-" + new string('-', level) + "+");
             }
 
+            // If chadless then the console mark character will be an uppercase U
+            if (chadless)
+                mark = 'U';
+
             // Start the big loop!
             for (int j = 0; j < segments; j++)
             {
@@ -429,18 +436,27 @@ namespace Ptap2DXF
                             for (int i = 0; i <= level - 1; i++)
                             {
                                 if (ba.Get(i))
-                                    dxf.DXF_Circle(Xpos, Ypos, 0, dataHoleRadius);
+                                    if (chadless)
+                                        dxf.DXF_Arc(Xpos, Ypos, 0, dataHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                    else
+                                        dxf.DXF_Circle(Xpos, Ypos, 0, dataHoleRadius);
                                 Xpos += holeSpacing;
                                 if (i == sprocketPos)
                                 {
-                                    dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
+                                    if (chadless)
+                                        dxf.DXF_Arc(Xpos, Ypos, 0, feedHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                    else
+                                        dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
                                     Xpos += holeSpacing;
                                 }
                             }
                             // If the sprocket hole is desired to be at the extreme right, draw it last
                             if (sprocketPos > level -1)
                             {
-                                dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
+                                if (chadless)
+                                    dxf.DXF_Arc(Xpos, Ypos, 0, feedHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                else
+                                    dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
                                 Xpos += holeSpacing;
                             }
                         }
@@ -450,17 +466,26 @@ namespace Ptap2DXF
                             // If the sprocket hole is desired to be at the extreme left, draw it first
                             if (sprocketPos > level - 1)
                             {
-                                dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
+                                if (chadless)
+                                    dxf.DXF_Arc(Xpos, Ypos, 0, feedHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                else
+                                    dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
                                 Xpos += holeSpacing;
                             }
                             for (int i = level - 1; i >= 0; i--)
                             {
                                 if (ba.Get(i))
-                                    dxf.DXF_Circle(Xpos, Ypos, 0, dataHoleRadius);
+                                    if (chadless)
+                                        dxf.DXF_Arc(Xpos, Ypos, 0, dataHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                    else
+                                        dxf.DXF_Circle(Xpos, Ypos, 0, dataHoleRadius);
                                 Xpos += holeSpacing;
                                 if (i == sprocketPos)
                                 {
-                                    dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
+                                    if (chadless)
+                                        dxf.DXF_Arc(Xpos, Ypos, 0, feedHoleRadius, chadlessStartAngle, chadlessEndAngle);
+                                    else
+                                        dxf.DXF_Circle(Xpos, Ypos, 0, feedHoleRadius);
                                     Xpos += holeSpacing;
                                 }
                             }
@@ -488,6 +513,8 @@ namespace Ptap2DXF
                             Console.Write(" MIRROR ");
                         if (joiningTape)
                             Console.Write(" JOINER ");
+                        if (chadless)
+                            Console.Write(" CHADLESS ");
                         if (baudot)
                         {
                             Console.Write(" BAUDOT ");
@@ -654,7 +681,7 @@ namespace Ptap2DXF
     /// </summary>
     public class Program
     {
-        const string VERSION = "1.1";   // Nothing complicated, here
+        const string VERSION = "1.2";   // Nothing complicated, here
 #if DOTNETCORE
         const string sep = "--";  // Unix-style fullword separator
 #else
@@ -692,6 +719,7 @@ namespace Ptap2DXF
             bool mirror = false;                    // Mirror image of tape so that underside joiners can be made (from paper, vinyl or contact plastic)
             bool baudot = false;                    // Convert ASCII alphanumeric and basic punctuation characters to Baudot code (forces level=5). Default is 8-level ASCII
             Parity parity = Parity.NONE;            // Use high bit (leftmost hole) as a parity bit, can be EVEN or ODD. Default is no parity
+            bool chadless = false;                  // Punch Teletype Corp chadless holes. The chad becomes an arc rather than a cut out circle
             bool waitAtEnd = false;                 // Issue a 'Press a key to End' before returning to command prompt
             int start = -1;
             int length = -1;
@@ -763,6 +791,10 @@ namespace Ptap2DXF
                     case "-BAU":  case "/BAU":  case "--BAU":  case "-BAUDOT":  case "/BAUDOT":  case "--BAUDOT":
                         baudot = true;
                         sprocketPos = 2;    // 5-level tape has the sprocket feed hole between the 2nd and 3rd data holes, starting from the right
+                        break;
+
+                    case "-CHADLESS":   case "/CHADLESS":   case "--CHADLESS":
+                        chadless = true;
                         break;
 
                     case "-C":  case "/C":  case "--C":  case "-CONTROL":    case "/CONTROL":    case "-CONTROL-CHARS":  case "/CONTROL-CHARS":  case "--CONTROL":
@@ -1096,7 +1128,7 @@ namespace Ptap2DXF
             PTAP2DXF papertape = new PTAP2DXF();
             errorLevel = papertape.Generate(inputFileName, outputFileName, start, length, segment, interSegmentGap, segmentsPerDXF, leader, trailer, mark, space, drawVee, 
                                                 joiningTape, level, sprocketPos, mirror, quiet, lineNumbers, showASCIIChars, showControlChars, dryRun, invertPattern, baudot, 
-                                                banner, messageText, requestedNumbering, parity);
+                                                banner, messageText, requestedNumbering, parity, chadless);
             if (waitAtEnd)
             {
                 Console.Write("Hit Enter to end");
@@ -1111,7 +1143,7 @@ namespace Ptap2DXF
         public static void Usage()
         {
             Console.WriteLine("PTAP2DXF - Generate DXF files from teletype punched paper tape binary images, suitable for home CNC stencil cutting");
-            Console.WriteLine("Written in C# by Steve Malikoff 2017 in Brisbane, Australia. Uses the DxfMaker library written by David S. Tufts");
+            Console.WriteLine("Written by Steve Malikoff (C) 2017 in Brisbane, Australia. Uses the DxfMaker library written by David S. Tufts");
             Console.Write("Version " + VERSION + "      ");
             Console.WriteLine("See https://github.com/1944GPW for more details");
             Console.WriteLine("Usage:");
@@ -1120,6 +1152,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "BANNERFILE=/path/to/bannerfile]        (Generate uppercase punched banner in 8x8 font from ASCII file contents)");
             Console.WriteLine("         [" + sep + "BANNERTEXT=\"YOUR TEXT\"]                (Generate uppercase punched banner in 8x8 font from string)");
             Console.WriteLine("         [" + sep + "BAUDOT]                                (convert ASCII characters to Baudot. Forces 5-level output)");
+            Console.WriteLine("         [" + sep + "CHADLESS]                              (Punch Teletype Corp chadless holes (circa 1975))");
             Console.WriteLine("         [" + sep + "CONTROL-CHARS]                         (Show control characters on console output)");
             Console.WriteLine("         [" + sep + "DRYRUN]                                (Run everything but do not generate DXF file(s))");
             Console.WriteLine("         [" + sep + "FLIP]                                  (Invert bit pattern. Logical NOT)");
