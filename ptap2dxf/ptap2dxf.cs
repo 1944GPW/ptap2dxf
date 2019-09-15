@@ -20,7 +20,7 @@
 //     Change to  $ cd ./ptap2dxf/ptap2dxf/bin/Debug/netcoreapp2.1
 //     Run with   $ dotnet ptap2dxf.dll --help
 // 
-// For .NET Core for Linux or Mac use VS2017. Run 'Restore Nuget Packages' for the solution.
+// For .NET Core for Linux or Mac use VS2017 or VS2019 (Community Edition works fine). Run 'Restore Nuget Packages' for the solution.
 //
 // For .NET Core leave the following defined. Actually you can leave DOTNETCORE defined for all builds on DNX, COREFX or Mono.
 #define DOTNETCORE
@@ -90,6 +90,8 @@ namespace Ptap2DXF
         /// <param name="numberedSection">Add line numbers to all or a particular desired section of the output</param>
         /// <param name="parity">Add parity {NONE, EVEN, ODD} using the most significant bit (leftmost hole)</param>
         /// <param name="chadless">Teletype Corporation Chadless holes</param>
+        /// <param name="wheatstone">Generate 2-level Morse tape in USN Wheatstone format</param>
+        /// <param name="cablecode">Generate 2-level Morse tape in Cable Code format</param>
         /// <returns>Return value. Zero for success, 1 for error. Useable by DOS ERRORLEVEL checking</returns>
         public int Generate(string someInputFileName, string someOutputFileName, int startOfData, int lengthOfData, int rowsPerSegment, int interSegmentGap, int segmentsPerDXF, 
                             int leader, int trailer, char mark, char space, bool drawVee, bool joiningTape, int level, int sprocketPos, bool mirror, bool quiet, bool showLineNumbers, bool showASCIIchars, bool showControlChars, 
@@ -105,16 +107,14 @@ namespace Ptap2DXF
             #endregion //Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape
 
             // Items pertaining to other-level widths eg. Baudot 11/16 inch (17.46 mm) for five bit codes, and 1 inch (25.4 mm) for tapes with six or more bits
-            // Things pertaining to Morse (Wheatstone and cable code) tape
+            // Things pertaining to Morse (USN Wheatstone and cable code) tape
             float fifteenThirtyseconds = (15 / 32) * inch;  // ref http://navy-radio.com/morse/mx491u-spec-01.jpg
             if (wheatstone || cablecode)
             {
                 level = 2;
                 baudot = false;
-                //chadless = false;
                 banner = "";
                 sprocketPos = 1;
-                //messageText = "";
             }
 
             float elevenSixteenths = 17.46f;
@@ -230,7 +230,7 @@ namespace Ptap2DXF
                         wheatstoneMsg.AddRange(wheat.GetLetter(c));
                     }
                 }
-                // We now know the final Wheatstone morse message size, so copy the conversion back to the main file byte buffer
+                // We now know the final Wheatstone Morse message size, so copy the conversion back to the main file byte buffer
                 if (wheatstoneMsg.Any())
                 {
                     fileBytes = new byte[wheatstoneMsg.Count];
@@ -255,7 +255,7 @@ namespace Ptap2DXF
                         cablecodeMsg.AddRange(cable.GetLetter(c));
                     }
                 }
-                // We now know the final cable code morese message size, so copy the conversion back to the main file byte buffer
+                // We now know the final Cable Code Morse message size, so copy the conversion back to the main file byte buffer
                 if (cablecodeMsg.Any())
                 {
                     fileBytes = new byte[cablecodeMsg.Count];
@@ -1235,9 +1235,9 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "ASCII]                                 (Show ASCII character representation for row on console output)");
             Console.WriteLine("         [" + sep + "BANNERFILE=/path/to/bannerfile]        (Generate uppercase punched banner in 8x8 font from ASCII file contents)");
             Console.WriteLine("         [" + sep + "BANNERTEXT=\"YOUR TEXT\"]                (Generate uppercase punched banner in 8x8 font from string)");
-            Console.WriteLine("         [" + sep + "BAUDOT]                                (convert ASCII characters to Baudot. Forces 5-level output)");
-            Console.WriteLine("         [" + sep + "CABLECODE]                             (Generate Morse tape with Cable Code coding (15/32\" wide))");
-            Console.WriteLine("         [" + sep + "CHADLESS]                              (Punch Teletype Corp chadless holes (circa 1975))");
+            Console.WriteLine("         [" + sep + "BAUDOT]                                (convert ASCII characters to ITA2 Baudot. Forces 5-level output)");
+            Console.WriteLine("         [" + sep + "CABLECODE]                             (Generate 2-level Morse tape with Cable Code coding (15/32 inch wide))");
+            Console.WriteLine("         [" + sep + "CHADLESS]                              (Half-punch Teletype Corp chadless holes (circa 1975))");
             Console.WriteLine("         [" + sep + "CONTROL-CHARS]                         (Show control characters on console output)");
             Console.WriteLine("         [" + sep + "DRYRUN]                                (Run everything but do not generate DXF file(s))");
             Console.WriteLine("         [" + sep + "FLIP]                                  (Invert bit pattern. Logical NOT)");
@@ -1252,7 +1252,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "NUMBER=BANNER|LEADER|CODE|TRAILER|ALL] (NOTE: " + sep + "N defaults to number the code lines only)");
             Console.WriteLine("         [" + sep + "OUTPUT=/path/to/outputfile.dxf]        (output DXF file)");
             Console.WriteLine("         [" + sep + "PARITY=NONE|EVEN|ODD]                  (Parity, if desired. Uses MSB ie. leftmost hole. {NONE, EVEN, ODD}. Default is NONE)");
-            Console.WriteLine("         [" + sep + "PERDXF=n]                              (Fill CNC cutting mat with this number of 1-inch-wide (for 8-level) segment strips across before starting another. 5-level = 11/16-inch)");
+            Console.WriteLine("         [" + sep + "PERDXF=n]                              (Fill CNC cutting mat with this number of 1 inch wide (for 8-level) segment strips across before starting another. 5-level = 11/16 inch)");
             Console.WriteLine("         [" + sep + "QUIET]                                 (do not write any console output)");
             Console.WriteLine("         [" + sep + "RANGE=n,[L [-p] [+-z]]                 (Start generation at byte n and run for following length L or previous p or prefix/suffix z bytes)");
             Console.WriteLine("         [" + sep + "SEGMENT=n]                             (Length in 0.1 inch increments for one vertical-cut paper strip before generating adjacent segment)");
@@ -1261,11 +1261,11 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "TEXT=\"" +
                 "" +
                 "YOUR TEXT\"]                      (Input text string to be punched, taken from the command line)");
-            Console.WriteLine("         [" + sep + "TRAILER=n]                             (Suffix output with blank sprocket punch tape in 0.1 inch increments eg. 120 is 1 foot)");
+            Console.WriteLine("         [" + sep + "TRAILER=n]                             (Suffix output with blank sprocket punch tape in 1/10 inch increments eg. 120 is 1 foot)");
             //BROKEN. TODO  Console.WriteLine("         [" + sep + "VEE]                                   (Draws /\\ vee at start of first and at end of last segment)");
             Console.WriteLine("         [" + sep + "VERSION]                               (Version number)");
             Console.WriteLine("         [" + sep + "WAIT]                                  (Pause for Enter on console after running)");
-            Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate Morse tape with Wheatstone coding (15/32\" wide))");
+            Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate 2-level Morse tape with USN Wheatstone coding (15/32 inch wide))");
         }
     }
 
@@ -1529,7 +1529,7 @@ namespace Ptap2DXF
         }
     }
 
-    // Morse
+    // Morse code
     public class Morse
     {
         public Dictionary<string, string> morse = new Dictionary<string, string>();
@@ -1592,7 +1592,7 @@ namespace Ptap2DXF
         }
     }
 
-    // Wheatstone morse encoding
+    // USN Wheatstone morse encoding
     // see http://www.quadibloc.com/feat.htm
     // and http://telegraphkeys.com/images/straightkeys/cable/cable%20tapes.jpg
     // and http://navy-radio.com/manuals/boehme-man-tm11-377.pdf
@@ -1629,7 +1629,7 @@ namespace Ptap2DXF
         public List<int> GetLetter(char someLetter)
         {
             pips.Clear();
-            // Space is a special case where the Wheatstone tape is just advanced one sprocket hole
+            // Space is a special case where the Cable Code tape is just advanced one sprocket hole
             if (char.IsWhiteSpace(someLetter))
                 pips.Add('\u0000');
             else
