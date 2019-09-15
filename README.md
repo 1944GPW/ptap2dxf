@@ -24,9 +24,10 @@ found with a .PTAP, .PTP, .TAP, .BIN or other extension and are often used with 
 care about file types as it treats everything as binary. In some situations the binary may first need to be converted using a 
 special utility to a paper tape image. In addition PTAP2DXF can be used for fun purposes such as punching letters and words 
 along the tape in an upper case 8x8 font, or as a text label punched as a prefixed description at the start of a binary tape. 
-It can make 11/16”-wide 5-level tape for an old Baudot machine. You could even experiment making tapes from various types of 
-plastic film or sheet.
+It can make 11/16”-wide 5-level tape for an old Baudot machine, and Teletype Corp's chadless tape from the mid 70s. 
+You could even experiment making tapes from various types of plastic film or sheet.
 
 * For more information see the User Manual PDF in the Documentation folder.
 * For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary folder for PTAP2DXF.EXE
 * This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt or try the pre-built ptap2dxf.dll
+* IN THE WORKS: exotic historical paper tape formats coming!
