@@ -2,7 +2,7 @@
   "profiles": {
     "ptap2dxf": {
       "commandName": "Project",
-      "commandLineArgs": "--help --wait"
+      "commandLineArgs": "--text=\"morse code\" --wheatstone"
     }
   }
 }

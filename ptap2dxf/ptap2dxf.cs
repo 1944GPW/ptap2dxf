@@ -93,7 +93,7 @@ namespace Ptap2DXF
         /// <returns>Return value. Zero for success, 1 for error. Useable by DOS ERRORLEVEL checking</returns>
         public int Generate(string someInputFileName, string someOutputFileName, int startOfData, int lengthOfData, int rowsPerSegment, int interSegmentGap, int segmentsPerDXF, 
                             int leader, int trailer, char mark, char space, bool drawVee, bool joiningTape, int level, int sprocketPos, bool mirror, bool quiet, bool showLineNumbers, bool showASCIIchars, bool showControlChars, 
-                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity, bool chadless)
+                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity, bool chadless, bool wheatstone, bool cablecode)
         {
             #region Constants that determine one-inch-wide 0.1 inch-spaced 8-level paper tape
             // Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape. The base units are metric and we then derive imperial from them.
@@ -104,7 +104,19 @@ namespace Ptap2DXF
             float tapeWidth = joiningTape ? (2 * inch) : inch;
             #endregion //Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape
 
-            // Constants that define other-level widths eg. Baudot 11/16 inch (17.46 mm) for five bit codes, and 1 inch (25.4 mm) for tapes with six or more bits
+            // Items pertaining to other-level widths eg. Baudot 11/16 inch (17.46 mm) for five bit codes, and 1 inch (25.4 mm) for tapes with six or more bits
+            // Things pertaining to Morse (Wheatstone and cable code) tape
+            float fifteenThirtyseconds = (15 / 32) * inch;  // ref http://navy-radio.com/morse/mx491u-spec-01.jpg
+            if (wheatstone || cablecode)
+            {
+                level = 2;
+                baudot = false;
+                //chadless = false;
+                banner = "";
+                sprocketPos = 1;
+                //messageText = "";
+            }
+
             float elevenSixteenths = 17.46f;
             if (level == 5)
                 tapeWidth = elevenSixteenths;
@@ -203,6 +215,59 @@ namespace Ptap2DXF
                 }
             }
             #endregion //Baudot
+
+            #region Morse
+            #region Wheatstone
+            if (wheatstone)
+            {
+                Wheatstone wheat = new Wheatstone();
+                List<int> wheatstoneMsg = new List<int>();
+                foreach (byte z in fileBytes)
+                {
+                    char c = Convert.ToChar(z);
+                    if (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c))
+                    {
+                        wheatstoneMsg.AddRange(wheat.GetLetter(c));
+                    }
+                }
+                // We now know the final Wheatstone morse message size, so copy the conversion back to the main file byte buffer
+                if (wheatstoneMsg.Any())
+                {
+                    fileBytes = new byte[wheatstoneMsg.Count];
+                    for (int i = 0; i < wheatstoneMsg.Count; i++)
+                    {
+                        int? b = wheatstoneMsg[i];
+                        fileBytes[i] = Convert.ToByte(b);
+                    }
+                }
+            }
+            #endregion //Wheatstone
+            #region Cable Code
+            if (cablecode)
+            {
+                CableCode cable = new CableCode();
+                List<int> cablecodeMsg = new List<int>();
+                foreach (byte z in fileBytes)
+                {
+                    char c = Convert.ToChar(z);
+                    if (char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c))
+                    {
+                        cablecodeMsg.AddRange(cable.GetLetter(c));
+                    }
+                }
+                // We now know the final cable code morese message size, so copy the conversion back to the main file byte buffer
+                if (cablecodeMsg.Any())
+                {
+                    fileBytes = new byte[cablecodeMsg.Count];
+                    for (int i = 0; i < cablecodeMsg.Count; i++)
+                    {
+                        int? b = cablecodeMsg[i];
+                        fileBytes[i] = Convert.ToByte(b);
+                    }
+                }
+            }
+            #endregion //Cable Code
+            #endregion //Morse
 
             #region Leader
             // Add leader, if specified
@@ -515,6 +580,10 @@ namespace Ptap2DXF
                             Console.Write(" JOINER ");
                         if (chadless)
                             Console.Write(" CHADLESS ");
+                        if (wheatstone)
+                            Console.Write(" MORSE (WHEATSTONE) ");
+                        if (cablecode)
+                            Console.Write(" MORSE (CABLE CODE) ");
                         if (baudot)
                         {
                             Console.Write(" BAUDOT ");
@@ -720,6 +789,9 @@ namespace Ptap2DXF
             bool baudot = false;                    // Convert ASCII alphanumeric and basic punctuation characters to Baudot code (forces level=5). Default is 8-level ASCII
             Parity parity = Parity.NONE;            // Use high bit (leftmost hole) as a parity bit, can be EVEN or ODD. Default is no parity
             bool chadless = false;                  // Punch Teletype Corp chadless holes. The chad becomes an arc rather than a cut out circle
+            bool wheatstone = false;                // Punch Morse (Wheatstone coding)
+            bool cablecode = false;                 // Punch Morse (cable coding)
+
             bool waitAtEnd = false;                 // Issue a 'Press a key to End' before returning to command prompt
             int start = -1;
             int length = -1;
@@ -791,6 +863,10 @@ namespace Ptap2DXF
                     case "-BAU":  case "/BAU":  case "--BAU":  case "-BAUDOT":  case "/BAUDOT":  case "--BAUDOT":
                         baudot = true;
                         sprocketPos = 2;    // 5-level tape has the sprocket feed hole between the 2nd and 3rd data holes, starting from the right
+                        break;
+
+                    case "-CABLECODE":  case "/CABLECODE":  case "--CABLECODE":
+                        cablecode = true;
                         break;
 
                     case "-CHADLESS":   case "/CHADLESS":   case "--CHADLESS":
@@ -1078,6 +1154,11 @@ namespace Ptap2DXF
                         waitAtEnd = true;
                         break;
 
+                    case "--WHEATSTONE":
+                    case "/WHEATSTONE":
+                        wheatstone = true;
+                        break;
+
                     case "-X":  case "/X":  case "--PERDXF":    case "--X": case "/PERDXF":     case "-PERDXF":  case "--SEGMENTSPERDXF":    case "/SEGMENTSPERDXF":
                         try
                         {
@@ -1113,6 +1194,9 @@ namespace Ptap2DXF
             if (baudot)
                 level = 5;
 
+            if (wheatstone || cablecode)
+                level = 2;
+
             // Bail out if some argument was wrong or out of spec, but wait for a key if requested
             if (errorLevel > 0)
             {
@@ -1128,7 +1212,7 @@ namespace Ptap2DXF
             PTAP2DXF papertape = new PTAP2DXF();
             errorLevel = papertape.Generate(inputFileName, outputFileName, start, length, segment, interSegmentGap, segmentsPerDXF, leader, trailer, mark, space, drawVee, 
                                                 joiningTape, level, sprocketPos, mirror, quiet, lineNumbers, showASCIIChars, showControlChars, dryRun, invertPattern, baudot, 
-                                                banner, messageText, requestedNumbering, parity, chadless);
+                                                banner, messageText, requestedNumbering, parity, chadless, wheatstone, cablecode);
             if (waitAtEnd)
             {
                 Console.Write("Hit Enter to end");
@@ -1152,6 +1236,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "BANNERFILE=/path/to/bannerfile]        (Generate uppercase punched banner in 8x8 font from ASCII file contents)");
             Console.WriteLine("         [" + sep + "BANNERTEXT=\"YOUR TEXT\"]                (Generate uppercase punched banner in 8x8 font from string)");
             Console.WriteLine("         [" + sep + "BAUDOT]                                (convert ASCII characters to Baudot. Forces 5-level output)");
+            Console.WriteLine("         [" + sep + "CABLECODE]                             (Generate Morse tape with Cable Code coding (15/32\" wide))");
             Console.WriteLine("         [" + sep + "CHADLESS]                              (Punch Teletype Corp chadless holes (circa 1975))");
             Console.WriteLine("         [" + sep + "CONTROL-CHARS]                         (Show control characters on console output)");
             Console.WriteLine("         [" + sep + "DRYRUN]                                (Run everything but do not generate DXF file(s))");
@@ -1180,6 +1265,7 @@ namespace Ptap2DXF
             //BROKEN. TODO  Console.WriteLine("         [" + sep + "VEE]                                   (Draws /\\ vee at start of first and at end of last segment)");
             Console.WriteLine("         [" + sep + "VERSION]                               (Version number)");
             Console.WriteLine("         [" + sep + "WAIT]                                  (Pause for Enter on console after running)");
+            Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate Morse tape with Wheatstone coding (15/32\" wide))");
         }
     }
 
@@ -1442,4 +1528,123 @@ namespace Ptap2DXF
             return (i >= 0) ? i : null;
         }
     }
+
+    // Morse
+    public class Morse
+    {
+        public Dictionary<string, string> morse = new Dictionary<string, string>();
+        public List<int> pips = new List<int>();
+
+        public Morse()
+        {
+            // Letters
+            morse.Add("A", ".-");
+            morse.Add("B", "-...");
+            morse.Add("C", "-.-.");
+            morse.Add("D", "-..");
+            morse.Add("E", ".");
+            morse.Add("F", "..-.");
+            morse.Add("G", "--.");
+            morse.Add("H", "....");
+            morse.Add("I", "..");
+            morse.Add("J", ".---");
+            morse.Add("K", "-.-");
+            morse.Add("L", ".-..");
+            morse.Add("M", "--");
+            morse.Add("N", "-.");
+            morse.Add("O", "---");
+            morse.Add("P", ".--.");
+            morse.Add("Q", "--.-");
+            morse.Add("R", ".-.");
+            morse.Add("S", "...");
+            morse.Add("T", "-");
+            morse.Add("U", "..-");
+            morse.Add("V", "...-");
+            morse.Add("W", ".--");
+            morse.Add("X", "-..-");
+            morse.Add("Y", "-.--");
+            morse.Add("Z", "--..");
+            // Numbers
+            morse.Add("1", ".----");
+            morse.Add("2", "..---");
+            morse.Add("3", "...--");
+            morse.Add("4", "...-");
+            morse.Add("5", ".....");
+            morse.Add("6", "-....");
+            morse.Add("7", "--...");
+            morse.Add("8", "---..");
+            morse.Add("9", "----.");
+            morse.Add("0", "-----");
+            // Punctuation
+            morse.Add(".", ".-.-.-");
+            morse.Add(",", "--..--");
+            morse.Add("?", "..--..");
+            morse.Add("\'", ".----.");
+            morse.Add("!", "-.-.--");
+            morse.Add(":", "---...");
+            morse.Add(";", "-.-.-.");
+            morse.Add("=", "-...-");
+            morse.Add("+", ".-.-.");
+            morse.Add("-", "-....-");
+            morse.Add("_", "..--.-");
+            morse.Add("\"", ".-..-.");
+            morse.Add("@", ".--.-.");
+        }
+    }
+
+    // Wheatstone morse encoding
+    // see http://www.quadibloc.com/feat.htm
+    // and http://telegraphkeys.com/images/straightkeys/cable/cable%20tapes.jpg
+    // and http://navy-radio.com/manuals/boehme-man-tm11-377.pdf
+    public class Wheatstone : Morse
+    {
+        public List<int> GetLetter(char someLetter)
+        {
+            pips.Clear();
+            // Space is a special case where the Wheatstone tape is just advanced one sprocket hole
+            if (char.IsWhiteSpace(someLetter))
+                pips.Add('\u0000');
+            else
+            {
+                foreach (char pip in morse[someLetter.ToString().ToUpper()])
+                {
+                    if (pip == '-')
+                    {
+                        pips.Add('\u0001');
+                        pips.Add('\u0002');
+                    }
+                    else
+                        pips.Add('\u0003');
+                }
+            }
+            pips.Add('\u0000'); // pips seperator
+            return pips;
+        }
+    }
+
+    // Cable code morse encoding
+    // see http://www.quadibloc.com/feat.htm
+    public class CableCode : Morse
+    {
+        public List<int> GetLetter(char someLetter)
+        {
+            pips.Clear();
+            // Space is a special case where the Wheatstone tape is just advanced one sprocket hole
+            if (char.IsWhiteSpace(someLetter))
+                pips.Add('\u0000');
+            else
+            {
+                foreach (char pip in morse[someLetter.ToString().ToUpper()])
+                {
+                    if (pip == '-')
+                        pips.Add('\u0002');
+                    else
+                        pips.Add('\u0001');
+                }
+            }
+            pips.Add('\u0000'); // pips seperator
+            return pips;
+        }
+    }
+
 }
