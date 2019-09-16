@@ -1,4 +1,6 @@
-﻿# ptap2dxf
+﻿![alt text](https://github.com/1944GPW/ptap2dxf/blob/master/Photos%20and%20screenshots/PTAP2DXF_logo.png?raw=true)
+
+# ptap2dxf
 PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home stencil cutting machine 
 
 * Do you have a vintage computer and paper tape reader, <b><i>but no punch</i></b>?
@@ -11,7 +13,8 @@ PTAP2DXF - Generate CNC-cut paper tapes from .PTAP or other binaries on a home s
 * Want 15/32" Morse tape for demonstrating your pre-war Creed or wartime USN equipment?
 
 If your answer is 'yes' to any of these questions then PTAP2DXF is for you.
-This tape was created with PTAP2DXF, a 2016 model Silhouette CAMEO vinyl/stencil cutter and a used large yellow envelope:
+This tape was created with PTAP2DXF, a 2016 model Silhouette CAMEO vinyl/stencil cutter and a used large yellow business envelope:
+
 ![alt text](https://github.com/1944GPW/ptap2dxf/blob/master/Photos%20and%20screenshots/19_finished_tape_2_small.jpg?raw=true)
 
 PTAP2DXF is a small open source command line utility that allows the user to make up to 8-level ASCII paper tapes similar to those 
