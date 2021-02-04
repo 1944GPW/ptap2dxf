@@ -625,7 +625,10 @@ namespace Ptap2DXF
                                 outputName = someInputFileName;
                             string[] tokens = outputName.Split('.');
                             if (tokens.Count() > 1)
-                                outputName = tokens[0] + "_" + currentDXF.ToString("D4") + ".dxf";
+                            {
+                                tokens = tokens.SkipLast(1).ToArray(); // Remove extention
+                                outputName = String.Join(".", tokens) + "_" + currentDXF.ToString("D4") + ".dxf";
+                            }
                             dxf.DXF_Save(outputName);
                             dxf = new DxfMaker(); // Start a new DXF drawing
                             currentDXF++;
@@ -651,7 +654,10 @@ namespace Ptap2DXF
                     {
                         string[] tokens = someInputFileName.Split('.');
                         if (tokens.Count() > 1)
-                            outputName = tokens[0] + ".dxf";
+                        {
+                            tokens = tokens.SkipLast(1).ToArray(); // Remove extention
+                            outputName = String.Join(".", tokens) + ".dxf";
+                        }
                     }
                     return dxf.DXF_Save(outputName) ? 0 : 1;
                 }
