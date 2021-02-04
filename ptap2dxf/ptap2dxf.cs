@@ -611,7 +611,7 @@ namespace Ptap2DXF
                         Console.Write("           ");   // pad out the width of the line number
                     Console.WriteLine("+-" + new string('-', level) + "+");  // see https://stackoverflow.com/questions/411752/best-way-to-repeat-a-character-in-c-sharp#411762
                 }
-                currentRow = currentRow + rowsThisSegment;
+                currentRow += rowsThisSegment;
                 // Save output if segmentsPerDXF used
                 if (!dryRun)
                 {
@@ -840,7 +840,7 @@ namespace Ptap2DXF
                                 }
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad banner finename specified. Use " + sep + "bannerfile=\"/path/to/bannerfile\"");
                             errorLevel = 1;
@@ -853,7 +853,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 banner = parameter.ToUpper().Split('=').Last(); // Take original parameter because leading or trailing spaces may have been included in banner text
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad banner text string specified. Use " + sep + "bannertext=\"BANNERTEXT\"");
                             errorLevel = 1;
@@ -891,7 +891,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 interSegmentGap = int.Parse(tokens[1]);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad inter-segment gap value specified. Use a +ve integer to produce a seperation between tape segment long edges in 0.1 inch increments");
                             errorLevel = 1;
@@ -909,7 +909,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 inputFileName = tokens[1];
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad input filename specified. Use " + sep + "input=\"/path/to/papertapeimagefile\"");
                             errorLevel = 1;
@@ -926,7 +926,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 leader = int.Parse(tokens[1]);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad tape leader padding value. Use a +ve integer to specify the number of 0.1-inch sprocket feed tape rows to prepend");
                             errorLevel = 1;
@@ -942,7 +942,7 @@ namespace Ptap2DXF
                             if (level < 1 || level > 8)
                                 throw new Exception();
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad level value:" + level + ". Use a +ve integer between 1 and 8 signifying the data bit width. Default is 8 for byte 8-level. Use 5 for 5-level Baudot.");
                             errorLevel = 1;
@@ -963,7 +963,7 @@ namespace Ptap2DXF
                                     mark = markString[0];
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad mark string specified. Use " + sep + "mark=\"O\". Only the first character is used.");
                             errorLevel = 1;
@@ -983,10 +983,10 @@ namespace Ptap2DXF
                                 string[] numberingTokens = tokens[1].Split(':');
                                 foreach (var numberingToken in numberingTokens)
                                     if (Enum.IsDefined(typeof(Numbering), numberingToken.ToUpper()))
-                                        requestedNumbering = requestedNumbering | (Numbering)Enum.Parse(typeof(Numbering), numberingToken, true);
+                                        requestedNumbering |= (Numbering)Enum.Parse(typeof(Numbering), numberingToken, true);
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad line numbering specified. Use " + sep + "number={NONE, BANNER, LEADER, CODE, TRAILER, ALL}  CODE is the default");
                             errorLevel = 1;
@@ -999,8 +999,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 outputFileName = tokens[1];
                         }
-                        catch (Exception e)
-                        {
+                        catch (Exception)                        {
                             Console.WriteLine("Bad output filename specified. Use " + sep + "output=\"/path/to/outputDXFfile\"");
                             errorLevel = 1;
                         }
@@ -1013,15 +1012,15 @@ namespace Ptap2DXF
                             {
                                 string parityString = parameter.ToUpper().Split('=').Last();
                                 if (!string.IsNullOrEmpty(parityString))
-                                    switch (parityString.ToUpper())
+                                    parity = parityString.ToUpper() switch
                                     {
-                                        case "EVEN": parity = Parity.EVEN; break;
-                                        case "ODD": parity = Parity.ODD; break;
-                                        default: parity = Parity.NONE; break;
-                                    }
+                                        "EVEN" => Parity.EVEN,
+                                        "ODD" => Parity.ODD,
+                                        _ => Parity.NONE
+                                    };
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad parity string specified. Use " + sep + "parity={NONE,EVEN,ODD} Default is NONE");
                             errorLevel = 1;
@@ -1045,12 +1044,12 @@ namespace Ptap2DXF
                                     if (tokens2[1].StartsWith("+-") || tokens2[1].StartsWith("-+")) // Take bytes from around specified offset (length -ve plus length +ve)
                                     {
                                         int halflength = int.Parse(tokens2[1].Remove(0, 2));
-                                        start = start - halflength; // Possible to have -ve start if producing joiner at or around zero (start of data)
+                                        start -= halflength; // Possible to have -ve start if producing joiner at or around zero (start of data)
                                         length = halflength * 2;
                                     }
                                     else if (tokens2[1].StartsWith("-"))    // Take bytes from specified offset going backwards (-ve length). Possible to have -ve start.
                                     {
-                                        start = start - length;
+                                        start -= length;
                                         length = Math.Abs(int.Parse(tokens2[1]));
                                     }
                                     else
@@ -1063,7 +1062,7 @@ namespace Ptap2DXF
                                 }
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad range parameters. Use either --range=offset,length  or --range=offset,-length  or --range=offset,+-length");
                             errorLevel = 1;
@@ -1076,7 +1075,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 segment = int.Parse(tokens[1]);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad segment length specified. Use " + sep + "segment=length where length is a +ve integer");
                             errorLevel = 1;
@@ -1093,7 +1092,7 @@ namespace Ptap2DXF
                                     space = spaceString[0];
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad space string specified. Use " + sep + "space=\" \". Only the first character is used.");
                             errorLevel = 1;
@@ -1109,7 +1108,7 @@ namespace Ptap2DXF
                             if (sprocketPos < 0 || sprocketPos > 8)
                                 throw new Exception();
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad sprocket position value: " + sprocketPos + ". Use a +ve integer between 0 and (level + 1) signifying the position. Default for 8-level tape is 3, ie. between the 3rd and 4th data hole from the right.");
                             errorLevel = 1;
@@ -1122,7 +1121,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 messageText = parameter.Split('=').Last(); // Take original parameter because leading or trailing spaces may have been included in the input text
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad input text string specified. Use " + sep + "text=\"THE QUICK BROWN FOX\"");
                             errorLevel = 1;
@@ -1135,7 +1134,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 trailer = int.Parse(tokens[1]);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             Console.WriteLine("Bad tape trailer addition value. Use a +ve integer to specify the number of 0.1-inch sprocket feed tape rows to append");
                             errorLevel = 1;
@@ -1165,7 +1164,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 segmentsPerDXF = int.Parse(tokens[1]);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
                             string label = "1-inch";
                             if (level == 5)
@@ -1475,16 +1474,16 @@ namespace Ptap2DXF
         // TODO FIX THIS BAUDOT CONVERSION. (It is only used for console formatting, not Baudot DXF generation)
         public static string ToBaudotName(this BitArray someBitArray)
         {
-            string s = string.Empty;
+            string s;
             byte z1 = someBitArray.ConvertToByte();
-
-            int bsr = z1  & 31;
-            char? csr = Baudot.GetLetter(bsr);
-
+            
+            //int bsr = z1  & 31;
+            //char? csr = Baudot.GetLetter(bsr);
+            
             int b = (int)z1 & 31;
             if (b == 27)
                 s = " SHIFT TO FIGS ";
-            if (b == 31)
+            else if (b == 31)
                 s = " SHIFT TO LETRS ";
             else
                 s = Convert.ToString(b);

@@ -11,7 +11,7 @@ namespace UnitTestProject1
     [TestClass]
     public class UnitTests
     {
-        PTAP2DXF fakeApp = new PTAP2DXF();
+        readonly PTAP2DXF fakeApp = new PTAP2DXF();
 
         /// <summary>
         /// TEST BannerText - that List<byte>() {0, 126, 9, 9, 9, 126, 0} == 'A'
