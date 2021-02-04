@@ -28,6 +28,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -803,6 +804,11 @@ namespace Ptap2DXF
             int length = -1;
             Numbering requestedNumbering = Numbering.CODE;  // Default is to number the console output lines for the code part only
             int errorLevel = 0;                     // Argument processing result and completion status. If > 0 something went horribly wrong
+
+            // Force the number decimal separator to dot, since the DXF-file format requires it.
+            CultureInfo customCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            CultureInfo.CurrentCulture = customCulture;
 
             // If no input or args then show Help and quit
             if (!args.Any())
