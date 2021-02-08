@@ -74,7 +74,7 @@ namespace JA.Planar
 		private void DXF_BuildBlockBody()
 		{
 			DXF_BlockBody = DXF_BlockBody + "BLOCK|  8|0|  2|*D" + BlockIndex + "|70|     1| 10|0.0| 20|0.0| 30|0.0|  3|*D" + BlockIndex + "|  1||0|ENDBLK|  8|0|0|";
-			BlockIndex = BlockIndex + 1;
+			BlockIndex++;
 		}
 
 		private string DXF_BlockFooter()
@@ -100,8 +100,8 @@ namespace JA.Planar
 
 		public bool DXF_Save(string fpath)
 		{
-			string strDXF_Output = null;
-			string[] varDXF = null;
+			string strDXF_Output;
+			string[] varDXF;
             try
             {
                 //Build a full text string
@@ -166,7 +166,7 @@ namespace JA.Planar
 			strDim[4] = " 13|" + x1 + "| 23|" + y1 + "| 33|0.0";
 			strDim[5] = " 14|" + x2 + "| 24|" + y2 + "| 34|0.0" + (iAng == 0 ? "" : "| 50|" + iAng);
 			strDim[6] = "1001|ACAD|1000|DSTYLE|1002|{|1070|   287|1070|     3|1070|    40|1040|" + DimScale + "|1070|   271|1070|     3|1070|   272|1070|     3|1070|   279|1070|     0|1002|}|  0|";
-			DXF_BodyText = DXF_BodyText + string.Join("|", strDim);
+			DXF_BodyText += string.Join("|", strDim);
 			//All dimensions need to be referenced in the header information
 			DXF_BuildBlockBody();
 		}
@@ -183,7 +183,7 @@ namespace JA.Planar
 			DXF_BodyText += string.Join("|", strRectangle);
 		}
 
-		private void DXF_Border(float x1, float y1, float Z1, float x2, float y2, float Z2)
+		public void DXF_Border(float x1, float y1, float Z1, float x2, float y2, float Z2)
 		{
 			string[] strBorder = new string[6];
 			strBorder[0] = "POLYLINE|  8|" + Layer + "| 40|1| 41|1| 66|1| 70|1|0";
@@ -197,9 +197,9 @@ namespace JA.Planar
 
 		public void DXF_ShowText(float x, float y, float eAng, float eRad, string eText)
 		{
-			float eX = 0;
-			float eY = 0;
-			float iRadians = 0;
+			float eX;
+			float eY;
+			float iRadians;
 			iRadians = (float)(Math.PI*eAng/180);
 			//Find the angle at which to draw the arrow head and leader
             eX = x - (float)(eRad * (Math.Cos(iRadians)));
@@ -243,7 +243,7 @@ namespace JA.Planar
 			int N = points.Length / 2;
 			string[] nodes = new string[N + 2];
 			nodes[0] = "POLYLINE| 8|" + Layer + "| 66| 1|0";
-			int i = 0;
+			int i;
 			for (i = 0; i <= N - 1; i++)
 				nodes[i + 1] = "VERTEX| 8|" + Layer + "| 10| " + points[2 * i] + "| 20| " + points[2 * i + 1] + "|0";
 			nodes[N + 1] = "SEQEND| 8|" + Layer + "|0|";
@@ -262,11 +262,11 @@ namespace JA.Planar
 
         public void DXF_Note(double x, double y, string note, double txt_height )
 		{
-			string[] lines = null;
+			string[] lines;
 			lines = note.Split(new string[] { Environment.NewLine } , StringSplitOptions.None);
 			for (int i = 0; i <= lines.Length - 1; i++) {
                 DXF_Text((float)x, (float)y, 0, (float)txt_height, lines[i]);
-				y = y - 2 * txt_height;
+				y -= 2 * txt_height;
 			}
 		}
 	}
