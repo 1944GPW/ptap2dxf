@@ -618,7 +618,7 @@ namespace Ptap2DXF
                 {
                     if (segmentsPerDXF > 0)
                     {
-                        if (--currentSegment <= 0)
+                        if ((--currentSegment <= 0) || (j == segments - 1) ) 
                         {
                             // Write the output DXF file
                             string outputName = someOutputFileName.CleanFilename();
@@ -1427,8 +1427,8 @@ namespace Ptap2DXF
         {
             return someInput; // Ignoring cleaning, since it's not that easy... (see, for example  https://stackoverflow.com/a/1976050)
                               // Also remember in its currently use, "someInput" can be also include the path to the file (relative or absolute).
-            Regex regex = new Regex(@"[^a-zA-Z0-9._-]");
-            return regex.Replace(someInput, "");
+            //Regex regex = new Regex(@"[^a-zA-Z0-9._-]");
+            //return regex.Replace(someInput, "");
         }
 
         /// <summary>
