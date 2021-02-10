@@ -918,8 +918,7 @@ namespace Ptap2DXF
                     case "-I":  case "/I":  case "--I":  case "--IN":    case "/IN": case "--INPUT": case "/INPUT":
                         try
                         {
-                            if (tokens.Count() > 1)
-                                inputFileName = tokens[1];
+                           inputFileName = parameter.Split('=', 2).Last();
                         }
                         catch (Exception)
                         {
@@ -1009,7 +1008,7 @@ namespace Ptap2DXF
                         try
                         {
                             if (tokens.Count() > 1)
-                                outputFileName = tokens[1];
+                                outputFileName = parameter.Split('=', 2).Last();
                         }
                         catch (Exception)                        {
                             Console.WriteLine("Bad output filename specified. Use " + sep + "output=\"/path/to/outputDXFfile\"");
@@ -1426,6 +1425,8 @@ namespace Ptap2DXF
         /// <returns>Parsed filename path</returns>
         public static string CleanFilename(this string someInput)
         {
+            return someInput; // Ignoring cleaning, since it's not that easy... (see, for example  https://stackoverflow.com/a/1976050)
+                              // Also remember in its currently use, "someInput" can be also include the path to the file (relative or absolute).
             Regex regex = new Regex(@"[^a-zA-Z0-9._-]");
             return regex.Replace(someInput, "");
         }

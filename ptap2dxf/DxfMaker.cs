@@ -119,6 +119,7 @@ namespace JA.Planar
 				//Reminder of where the file was saved to
 			    return true;
 			} catch (System.IO.IOException ex) {
+				Console.Write("Error during DXF Save (" + fpath + ")");
                 Debug.WriteLine(ex.ToString());
 			    return false;
 			}
