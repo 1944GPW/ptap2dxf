@@ -93,10 +93,12 @@ namespace Ptap2DXF
         /// <param name="chadless">Teletype Corporation Chadless holes</param>
         /// <param name="wheatstone">Generate 2-level Morse tape in USN Wheatstone format</param>
         /// <param name="cablecode">Generate 2-level Morse tape in Cable Code format</param>
+        /// <param name="whirlwind">Generate 7-level MIT Whirlwind tape 7/8" NOTE: TODO in Whirlwind code format http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_Paper_Tape_Format.pdf</param>
         /// <returns>Return value. Zero for success, 1 for error. Useable by DOS ERRORLEVEL checking</returns>
         public int Generate(string someInputFileName, string someOutputFileName, int startOfData, int lengthOfData, int rowsPerSegment, int interSegmentGap, int segmentsPerDXF, 
                             int leader, int trailer, char mark, char space, bool drawVee, bool joiningTape, int level, int sprocketPos, bool mirror, bool quiet, bool showLineNumbers, bool showASCIIchars, bool showControlChars, 
-                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity, bool chadless, bool wheatstone, bool cablecode)
+                            bool dryRun, bool invertPattern, bool baudot, string banner, string messageText, Numbering numberedSection, Parity parity, bool chadless, bool wheatstone, bool cablecode,
+                            bool whirlwind)
         {
             #region Constants that determine one-inch-wide 0.1 inch-spaced 8-level paper tape
             // Constants that determine one-inch-wide 0.1 inch-spaced 8-level ASCII teletype paper tape. The base units are metric and we then derive imperial from them.
@@ -123,6 +125,17 @@ namespace Ptap2DXF
                 tapeWidth = elevenSixteenths;
             if (level < 5)
                 tapeWidth = level * holeSpacing + holeSpacing + holeSpacing;
+
+            // MIT Whirlwind was 7-level 7/8" wide tape. TODO protocol see http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_Paper_Tape_Format.pdf
+            // NOTE: conflicts with https://www.polyomino.org.uk/computer/ECMA-10/ 7-level standard, it says 1" wide !!!!????
+            // BUT photo at http://bitsavers.org/bits/MIT/whirlwind/X4222.2008_Whirlwind_ptp/pictures/start_of_sort_20180724/8.JPG shows 7 data hole width!
+            if (whirlwind)
+            {
+                float sevenEighths = 22.225f;   // (7 / 8) * inch
+                level = 7;
+                sprocketPos = 4;
+                tapeWidth = sevenEighths;
+            }
 
             #region Variables
             List<BitArray> msgbits = new List<BitArray>();  // The binary representation of the input
@@ -757,7 +770,7 @@ namespace Ptap2DXF
     /// </summary>
     public class Program
     {
-        const string VERSION = "1.2";   // Nothing complicated, here
+        const string VERSION = "1.3";   // Nothing complicated, here
 #if DOTNETCORE
         const string sep = "--";  // Unix-style fullword separator
 #else
@@ -798,6 +811,7 @@ namespace Ptap2DXF
             bool chadless = false;                  // Punch Teletype Corp chadless holes. The chad becomes an arc rather than a cut out circle
             bool wheatstone = false;                // Punch Morse (Wheatstone coding)
             bool cablecode = false;                 // Punch Morse (cable coding)
+            bool whirlwind = false;                 // Punch physical 7/8" 7-level MIT Whirlwind (TODO WIP actual Whirlwind protocol)
 
             bool waitAtEnd = false;                 // Issue a 'Press a key to End' before returning to command prompt
             int start = -1;
@@ -1169,6 +1183,11 @@ namespace Ptap2DXF
                         wheatstone = true;
                         break;
 
+                    case "--WHIRLWIND":
+                    case "/WHIRLWIND":
+                        whirlwind = true;
+                        break;
+
                     case "-X":  case "/X":  case "--PERDXF":    case "--X": case "/PERDXF":     case "-PERDXF":  case "--SEGMENTSPERDXF":    case "/SEGMENTSPERDXF":
                         try
                         {
@@ -1222,7 +1241,8 @@ namespace Ptap2DXF
             PTAP2DXF papertape = new PTAP2DXF();
             errorLevel = papertape.Generate(inputFileName, outputFileName, start, length, segment, interSegmentGap, segmentsPerDXF, leader, trailer, mark, space, drawVee, 
                                                 joiningTape, level, sprocketPos, mirror, quiet, lineNumbers, showASCIIChars, showControlChars, dryRun, invertPattern, baudot, 
-                                                banner, messageText, requestedNumbering, parity, chadless, wheatstone, cablecode);
+                                                banner, messageText, requestedNumbering, parity, chadless, wheatstone, cablecode,
+                                                whirlwind);
             if (waitAtEnd)
             {
                 Console.Write("Hit Enter to end");
@@ -1276,6 +1296,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "VERSION]                               (Version number)");
             Console.WriteLine("         [" + sep + "WAIT]                                  (Pause for Enter on console after running)");
             Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate 2-level Morse tape with USN Wheatstone coding (15/32 inch wide))");
+            Console.WriteLine("         [" + sep + "WHIRLWIND]                             (Generate 7-level MIT Whirlwind (7/8 inch wide))");
         }
     }
 

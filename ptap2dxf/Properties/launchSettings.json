@@ -2,7 +2,7 @@
   "profiles": {
     "ptap2dxf": {
       "commandName": "Project",
-      "commandLineArgs": "--text=\"morse code\" --wheatstone"
+      "commandLineArgs": "--whirlwind --text=\"012ABC\""
     }
   }
 }
