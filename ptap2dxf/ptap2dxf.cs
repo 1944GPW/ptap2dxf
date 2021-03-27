@@ -1130,7 +1130,7 @@ namespace Ptap2DXF
                             if (tokens.Count() > 1)
                                 sprocketPos = int.Parse(tokens[1]);
                             // Verify the value is within punching range
-                            if (sprocketPos < 0 || sprocketPos > 8)
+                            if (sprocketPos < -1 || sprocketPos > 8)
                                 throw new Exception();
                         }
                         catch (Exception)
@@ -1287,7 +1287,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "RANGE=n,[L [-p] [+-z]]                 (Start generation at byte n and run for following length L or previous p or prefix/suffix z bytes)");
             Console.WriteLine("         [" + sep + "SEGMENT=n]                             (Length in 0.1 inch increments for one vertical-cut paper strip before generating adjacent segment)");
             Console.WriteLine("         [" + sep + "SPACE=c]                               (Console output character to represent a space (data bit = 0). Default is ' '");
-            Console.WriteLine("         [" + sep + "SPROCKET=n]                            (Sprocket feed hole position. Default is 3 for between 3rd and 4th data bit holes starting from right)");
+            Console.WriteLine("         [" + sep + "SPROCKET=n]                            (Sprocket feed hole position. 0 through 8. Default is 3 for between 3rd and 4th data bit holes starting from right. -1 to supress)");
             Console.WriteLine("         [" + sep + "TEXT=\"" +
                 "" +
                 "YOUR TEXT\"]                      (Input text string to be punched, taken from the command line)");

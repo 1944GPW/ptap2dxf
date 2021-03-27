@@ -21,7 +21,8 @@ This tape was created with PTAP2DXF, a 2016 model Silhouette CAMEO vinyl/stencil
 PTAP2DXF is a small open source command line utility that allows the user to make up to 8-level ASCII paper tapes similar to those 
 punched by an ASR33 Teletype, <b>using only a common home CNC vinyl/stencil cutter</b> (eg. Silhouette Cameo, Cricut etc) from binary images available on the internet, or your own files. 
 For the default 8-level tape it makes, the output is one inch wide with a pattern of up to 8 data mark/space holes across 
-as well as a smaller sprocket feed hole. The rows are spaced at 0.1 inch apart.
+as well as a smaller sprocket feed hole. The rows are spaced at 0.1 inch apart. 
+The sprocket hole can be moved to any position desired, even outside the data bits.
 
 Its primary use is to make small tapes for loading software such as Absolute Loaders, MAINDECs (diagnostics) or other programs 
 into vintage computers such as the Digital Equipment Corporation PDP-11, Altair, IMSAI or the like. These images are commonly 
@@ -37,6 +38,6 @@ It can now act like a Morse perforator and produce 15/32" wide Morse tape in bot
 You can use it to experiment making tapes from various types of plastic film or sheet.
 
 * For more information see the User Manual PDF in the Documentation folder.
-* For a ready-to-run program for Windows (.Net 4.0) look in the Pre-built_binary folder for PTAP2DXF.EXE
-* This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt or try the pre-built ptap2dxf.dll
+* For a ready-to-run program for .NET Core 3.1 look in the Pre-built_binary folder for PTAP2DXF.EXE
+* This is a .NET Core application, for Linux and Mac platforms follow the instructions in __readme_Building_and_running.txt or try the pre-built exe
 * IN THE WORKS: more exotic historical paper tape formats coming!

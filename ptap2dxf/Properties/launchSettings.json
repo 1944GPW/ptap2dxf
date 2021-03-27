@@ -1,8 +1,7 @@
 {
   "profiles": {
     "ptap2dxf": {
-      "commandName": "Project",
-      "commandLineArgs": "--whirlwind --text=\"012ABC\""
+      "commandName": "Project"
     }
   }
 }
