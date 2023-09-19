@@ -126,15 +126,16 @@ namespace Ptap2DXF
             if (level < 5)
                 tapeWidth = level * holeSpacing + holeSpacing + holeSpacing;
 
-            // MIT Whirlwind was 7-level 7/8" wide tape. TODO protocol see http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_Paper_Tape_Format.pdf
-            // NOTE: conflicts with https://www.polyomino.org.uk/computer/ECMA-10/ 7-level standard, it says 1" wide !!!!????
-            // BUT photo at http://bitsavers.org/bits/MIT/whirlwind/X4222.2008_Whirlwind_ptp/pictures/start_of_sort_20180724/8.JPG shows 7 data hole width!
+            // MIT Whirlwind was 7-level 7/8" wide tape. See http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_Paper_Tape_Format.pdf
+            // Photo at http://bitsavers.org/bits/MIT/whirlwind/X4222.2008_Whirlwind_ptp/pictures/start_of_sort_20180724/8.JPG 
+            // Confirmed with examples kindly supplied by Guy Fedorkow @ MIT
             if (whirlwind)
             {
                 float sevenEighths = 22.225f;   // (7 / 8) * inch
                 level = 7;
-                sprocketPos = 4;
+                sprocketPos = 2;                // With forced mirroring true this should appear between fourth and fifth bit from the right
                 tapeWidth = sevenEighths;
+                mirror = true;
             }
 
             #region Variables
@@ -383,11 +384,18 @@ namespace Ptap2DXF
                 mark = 'U';
 
             // Start the big loop!
+            bool startNewDXF = false;
             for (int j = 0; j < segments; j++)
             {
                 int rowsThisSegment = Math.Min(rowsPerSegment, totalRows - currentRow); // Number of bytes (one byte's worth of mark/space holes) to fit top to bottom on CNC stencil cutting mat
-                float segmentXorigin = j * (tapeWidth + segmentSideBySideSpacing);
-
+                float segmentXorigin = j * (tapeWidth + segmentSideBySideSpacing);  // (*) TODO FIX BUG WHEN --PERDXF=1 ie. ONE SEGMENT PER DXF SHOULD POSITION AT EXTREME LHS NOT CREEP ACROSS ON SUCCESSIVE DXFs
+                /* 20220301 BROKEN - TO FIX PERDXF PROPERLY
+                if (startNewDXF)
+                {
+                    segmentXorigin = 0;
+                    startNewDXF = false;
+                }
+                */
                 // Determine segment edge length as #bytes * 2.54mm  (one-tenth inch)
                 float tapeLengthOfHoles = rowsThisSegment * holeSpacing;
                 float tapeLengthTotal = tapeLengthOfHoles;
@@ -512,6 +520,11 @@ namespace Ptap2DXF
                         {
                             // Produce a mirror image of the holes to make paper or sticky vinyl joiners that go on the reverse side (underside) of the paper tape, if desired.
                             // Position sprocket feed hole accordingly.
+                            // NOTE that some formats such as Whirlwind require default mirroring
+                            //if (whirlwind)
+                            //    sprocketPos = 2;
+
+
                             for (int i = 0; i <= level - 1; i++)
                             {
                                 if (ba.Get(i))
@@ -530,7 +543,7 @@ namespace Ptap2DXF
                                 }
                             }
                             // If the sprocket hole is desired to be at the extreme right, draw it last
-                            if (sprocketPos > level -1)
+                            if (sprocketPos > level - 1)
                             {
                                 if (chadless)
                                     dxf.DXF_Arc(Xpos, Ypos, 0, feedHoleRadius, chadlessStartAngle, chadlessEndAngle);
@@ -582,13 +595,28 @@ namespace Ptap2DXF
                             overallCount++;
                         }
                         // Emit the data line on the console
-                        string displayNLevelRow = PaperTapeExtensions.FormatNLevelRow(ba, level, sprocketPos, mark, space);
+
+
+
+
+                        int shiftedSprocketPos = 0;
+                        if (whirlwind)
+                            shiftedSprocketPos = 3;
+                        else
+                            shiftedSprocketPos = sprocketPos;
+
+
+                        //string displayNLevelRow = PaperTapeExtensions.FormatNLevelRow(ba, level, sprocketPos, mark, space);
+                        string displayNLevelRow = PaperTapeExtensions.FormatNLevelRow(ba, level, shiftedSprocketPos, mark, space);
+
+
+
                         if (mirror)
                             displayNLevelRow = displayNLevelRow.Reverse();
                         Console.Write(displayNLevelRow);
                         if (invertPattern)
                             Console.Write(" INVERTED ");
-                        if (mirror)
+                        if (mirror && !whirlwind)
                             Console.Write(" MIRROR ");
                         if (joiningTape)
                             Console.Write(" JOINER ");
@@ -596,6 +624,8 @@ namespace Ptap2DXF
                             Console.Write(" CHADLESS ");
                         if (wheatstone)
                             Console.Write(" MORSE (WHEATSTONE) ");
+                        if (whirlwind)
+                            Console.Write(" WHIRLWIND ");
                         if (cablecode)
                             Console.Write(" MORSE (CABLE CODE) ");
                         if (baudot)
@@ -648,6 +678,8 @@ namespace Ptap2DXF
                             currentDXF++;
                             currentSegment = segmentsPerDXF;
                             currentSegment = Math.Min(segmentsPerDXF, segments - currentSegment);
+
+                            //DOESNT WORK SEE ABOVE (*)  TODO FIX   startNewDXF = true;
                         }
                     }
                 }
@@ -770,7 +802,7 @@ namespace Ptap2DXF
     /// </summary>
     public class Program
     {
-        const string VERSION = "1.3";   // Nothing complicated, here
+        const string VERSION = "1.4";   // Nothing complicated, here
 #if DOTNETCORE
         const string sep = "--";  // Unix-style fullword separator
 #else
@@ -811,7 +843,7 @@ namespace Ptap2DXF
             bool chadless = false;                  // Punch Teletype Corp chadless holes. The chad becomes an arc rather than a cut out circle
             bool wheatstone = false;                // Punch Morse (Wheatstone coding)
             bool cablecode = false;                 // Punch Morse (cable coding)
-            bool whirlwind = false;                 // Punch physical 7/8" 7-level MIT Whirlwind (TODO WIP actual Whirlwind protocol)
+            bool whirlwind = false;                 // Punch physical 7/8" 7-level MIT Whirlwind
 
             bool waitAtEnd = false;                 // Issue a 'Press a key to End' before returning to command prompt
             int start = -1;
@@ -1296,7 +1328,7 @@ namespace Ptap2DXF
             Console.WriteLine("         [" + sep + "VERSION]                               (Version number)");
             Console.WriteLine("         [" + sep + "WAIT]                                  (Pause for Enter on console after running)");
             Console.WriteLine("         [" + sep + "WHEATSTONE]                            (Generate 2-level Morse tape with USN Wheatstone coding (15/32 inch wide))");
-            Console.WriteLine("         [" + sep + "WHIRLWIND]                             (Generate 7-level MIT Whirlwind (7/8 inch wide))");
+            Console.WriteLine("         [" + sep + "WHIRLWIND]                             (Generate 7-level MIT Whirlwind (7/8 inch wide, 6 data bits + 1 index bit))");
         }
     }
 

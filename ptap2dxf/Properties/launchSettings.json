@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ptap2dxf": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--whirlwind \"C:\\Temp\\whirlwindtest\\seq(1).7ch\"  --perdxf=2 --segment=10"
     }
   }
 }

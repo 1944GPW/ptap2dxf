@@ -1,0 +1,133 @@
+3:33 PM 23-Feb-22
+
+MIT Whirlwind
+
+
+From http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_I_descr_Apr1955.pdf
+Punched Paper Tape:
+Flexowriter 7-hole tape (6 information, 1 index); 6-binary-digit 
+code for letters and decimal numbers, 10 lines/inch.
+
+
+http://web.mit.edu/digitalapollo/Documents/Chapter5/laningwhirlwind.pdf
+a Stop character must be placed at the end of every program.
+Flexowriter character number 49
+
+Photo of Whirlwind tapes:
+http://bitsavers.org/bits/MIT/whirlwind/X4222.2008_Whirlwind_ptp/pictures/start_of_sort_20180724/8.JPG
+
+Whirlwind paper tape format:
+http://www.bitsavers.org/pdf/mit/whirlwind/Whirlwind_Paper_Tape_Format.pdf
+
++++++++++++++++++++++++++++++++
+
+4:14 PM 26-Feb-22
+
+C:\Temp\whirlwindtest>ptap2dxf --whirlwind seq.7ch --segment=64
++--------+
+| OO.OOO | WHIRLWIND
+| O .    | WHIRLWIND
+| O .    | WHIRLWIND
+| OO.OOO | WHIRLWIND
+| O .    | WHIRLWIND
+| O .    | WHIRLWIND
+| O .    | WHIRLWIND
+|   .    | WHIRLWIND
+|  O.OO  | WHIRLWIND
+| O .  O | WHIRLWIND
+| O .    | WHIRLWIND
+| O .    | WHIRLWIND
+| O .    | WHIRLWIND
+| O .  O | WHIRLWIND
+|  O.OO  | WHIRLWIND
+|   .    | WHIRLWIND
+|   . O  | WHIRLWIND
+|   .O   | WHIRLWIND
+|  O.    | WHIRLWIND
+|  O.    | WHIRLWIND
+|  O.    | WHIRLWIND
+|   .O   | WHIRLWIND
+|   . O  | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|OOO.  OO| WHIRLWIND
+|   .OO O| WHIRLWIND
+|  O.   O| WHIRLWIND
+|  O. O O| WHIRLWIND
+|OOO.O OO| WHIRLWIND
+|   . O O| WHIRLWIND
+|O O.OO O| WHIRLWIND
+|  O.OO O| WHIRLWIND
+|   . O O| WHIRLWIND
+| OO.   O| WHIRLWIND
+| OO.O  O| WHIRLWIND
+|   . O O| WHIRLWIND
+|  O.   O| WHIRLWIND
+|OO .   O| WHIRLWIND
+| OO. O O| WHIRLWIND
+|  O.   O| WHIRLWIND
+|OOO.  OO| WHIRLWIND
+|   .OO O| WHIRLWIND
+|OOO.O OO| WHIRLWIND
+| OO.O  O| WHIRLWIND
+|O  .   O| WHIRLWIND
+|  O.O  O| WHIRLWIND
+|OO .   O| WHIRLWIND
+| OO.   O| WHIRLWIND
+|  O. O O| WHIRLWIND
+|OOO.  OO| WHIRLWIND
+|  O.  OO| WHIRLWIND
+|  O.   O| WHIRLWIND
+|O  .OO O| WHIRLWIND
+|OOO.O OO| WHIRLWIND
++--------+
+|O O.   O| WHIRLWIND
+|  O.O  O| WHIRLWIND
+| O .O  O| WHIRLWIND
+|O  .O  O| WHIRLWIND
+|O  .OO O| WHIRLWIND
+|  O.O  O| WHIRLWIND
+| OO.   O| WHIRLWIND
+| O . O O| WHIRLWIND
+|  O.   O| WHIRLWIND
+|   .OO O| WHIRLWIND
+|O  .   O| WHIRLWIND
+|  O.   O| WHIRLWIND
+|OOO.  OO| WHIRLWIND
+|OOO.   O| WHIRLWIND
+|  O.O  O| WHIRLWIND
+|O  .   O| WHIRLWIND
+|  O.   O| WHIRLWIND
+| OO.  OO| WHIRLWIND
+|  O.O  O| WHIRLWIND
+|O O.   O| WHIRLWIND
+|O  .   O| WHIRLWIND
+| OO. O O| WHIRLWIND
+|O O.O  O| WHIRLWIND
+| O .  OO| WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
+|   .    | WHIRLWIND
++--------+
+Joiner 0000: data byte 00000000  absolute position 00000064
+Joiner 0001: data byte 00000064  absolute position 00000098
+
+C:\Temp\whirlwindtest>
+
+
